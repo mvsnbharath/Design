@@ -26,7 +26,7 @@ public class Main {
         rajaVehicle.setLicenseNumber("5678");
 
         System.out.println("Initiate Ticket generation");
-        ParkingTicket parkingTicket2 = parkingLot.getNewPjnarkingTicket(rajaVehicle);
+        ParkingTicket parkingTicket2 = parkingLot.getNewParkingTicket(rajaVehicle);
         rajaVehicle.setParkingTicket(parkingTicket2);
         System.out.println("Ticket generated for Vehicle : "+ rajaVehicle.toString());
 

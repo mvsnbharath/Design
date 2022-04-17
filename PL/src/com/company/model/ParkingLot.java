@@ -13,7 +13,7 @@ public class ParkingLot {
     private int maxCompactCount = 0;
     private int maxLargeCount = 0;
     private int maxElectricCount = 0;
-    //        private ParkingRate parkingRate;
+//        private ParkingRate parkingRate;
 //        private HashMap<String, EntrancePanel> entrancePanels;
 //    private HashMap<String, ExitPanel> exitPanels;
     private HashMap<String, ParkingFloor> parkingFloors = new HashMap<>();
@@ -35,7 +35,6 @@ public class ParkingLot {
         parkingFloors.put(parkingFloor2.getName(), parkingFloor2);
 
         displayBoard();
-                System.out.println(toString());
         System.out.println("===Parking Lot Created===");
     }
 
