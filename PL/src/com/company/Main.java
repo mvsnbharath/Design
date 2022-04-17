@@ -16,8 +16,8 @@ public class Main {
         niharikaVehicle.setLicenseNumber("1234");
 
         System.out.println("Initiate Ticket generation");
-        ParkingTicket parkingTicket = parkingLot.getNewParkingTicket(niharikaVehicle);
-        niharikaVehicle.setParkingTicket(parkingTicket);
+        ParkingTicket nihaParkingTicket = parkingLot.getNewParkingTicket(niharikaVehicle);
+        niharikaVehicle.setParkingTicket(nihaParkingTicket);
         System.out.println("Ticket generated for Vehicle : "+ niharikaVehicle.toString());
 
         //Vehicle 2 - Raja
@@ -26,11 +26,11 @@ public class Main {
         rajaVehicle.setLicenseNumber("5678");
 
         System.out.println("Initiate Ticket generation");
-        ParkingTicket parkingTicket2 = parkingLot.getNewParkingTicket(rajaVehicle);
-        rajaVehicle.setParkingTicket(parkingTicket2);
+        ParkingTicket rajaParkingTicket = parkingLot.getNewParkingTicket(rajaVehicle);
+        rajaVehicle.setParkingTicket(rajaParkingTicket);
         System.out.println("Ticket generated for Vehicle : "+ rajaVehicle.toString());
 
-        parkingLot.payBill(niharikaVehicle);
-        parkingLot.payBill(rajaVehicle);
+        parkingLot.clearSpotAndPayBill(niharikaVehicle);
+        parkingLot.clearSpotAndPayBill(rajaVehicle);
     }
 }

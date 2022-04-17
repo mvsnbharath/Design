@@ -1,6 +1,7 @@
 package com.company.model;
 
 import java.time.Instant;
+import java.util.Random;
 
 public class ParkingTicket {
     private Instant timestamp;
@@ -38,6 +39,13 @@ public class ParkingTicket {
         this.floor = floor;
     }
 
+
+    public void payBill(Vehicle vehicle) {
+        int bill = new Random().nextInt(10) ;
+        ParkingTicket parkingTicket = vehicle.getParkingTicket();
+        parkingTicket.setBill(bill);
+        System.out.println(" Bill payed  by "+ vehicle.getLicenseNumber() + " = "+ Integer.toString(bill));
+    }
 
     @Override
     public String toString() {
