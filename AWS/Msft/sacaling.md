@@ -29,33 +29,23 @@ flowchart TB
 
 ---
 
-## 2. Expensive Query Path
-
-```mermaid
-flowchart LR
-    subgraph External["External Flow — Efficient"]
-        E1[External Request] -->|customer ID = partition key| E2[Point Read] --> DB1[(Database)]
-    end
-
-    subgraph Internal["Internal Flow — Expensive"]
-        I1[Internal Request] -->|UUID ≠ partition key| I2[Cross-Partition Query] --> DB2[(Database)]
-    end
-```
-
----
-
-## 3. Point-Read Optimization
+## 2. Point-Read Optimization
 
 ```mermaid
 flowchart LR
     R1[Request] --> Check{Partition Key<br/>Known?}
-    Check -->|Yes| PR[Point Read<br/>O 1 — cheap] --> DB[(Database)]
-    Check -->|No| CQ[Cross-Partition Query<br/>O N — expensive] --> DB
+    Check -->|Yes| PR["Point Read<br/>~2 RUs"] --> DB[(Database)]
+    Check -->|No| CQ["Cross-Partition Query<br/>~50 RUs"] --> DB
+
+    subgraph Impact["25x Cost Reduction"]
+        direction LR
+        I1["50 RUs → 2 RUs per read"]
+    end
 ```
 
 ---
 
-## 4. Reverse-Index Optimization
+## 3. Reverse-Index Optimization
 
 ```mermaid
 flowchart LR
@@ -67,7 +57,7 @@ flowchart LR
 
 ---
 
-## 5. Cache Invalidation Tradeoff
+## 4. Cache Invalidation Tradeoff
 
 ```mermaid
 flowchart TB
@@ -88,7 +78,7 @@ flowchart TB
 
 ---
 
-## 6. Versioned Cache Design
+## 5. Versioned Cache Design
 
 ```mermaid
 flowchart TB
@@ -113,7 +103,7 @@ flowchart TB
 
 ---
 
-## 7. Final System + Outcomes
+## 6. Final System + Outcomes
 
 ```mermaid
 flowchart TB
