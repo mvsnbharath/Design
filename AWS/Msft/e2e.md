@@ -62,7 +62,7 @@ flowchart TB
 ## 3.5 How a Bloom Filter Works
 
 ```mermaid
-flowchart TB
+flowchart LR
     subgraph BF[Bloom Filter — Bit Array]
         direction LR
         B0[0]
@@ -81,14 +81,29 @@ flowchart TB
         H3["Hash₃(X) → index 5"]
     end
 
-    subgraph Lookup[Lookup: Resource Y]
+    subgraph Lookup_TP["✔ True Positive — Resource X"]
+        T1["Hash₁(X) → index 1 → ✔"]
+        T2["Hash₂(X) → index 3 → ✔"]
+        T3["Hash₃(X) → index 5 → ✔"]
+        T4["All bits = 1 → In set ✔ (X was inserted)"]
+    end
+
+    subgraph Lookup_TN["✔ True Negative — Resource Y"]
         L1["Hash₁(Y) → index 1 → ✔"]
         L2["Hash₂(Y) → index 4 → ✘"]
         L3["Any bit = 0 → Definitely NOT in set"]
     end
 
+    subgraph Lookup_FP["⚠ False Positive — Resource Z"]
+        F1["Hash₁(Z) → index 1 → ✔"]
+        F2["Hash₂(Z) → index 3 → ✔"]
+        F3["All bits = 1 → Looks like it's in set, but Z was never inserted!"]
+    end
+
     Insert --> BF
-    BF --> Lookup
+    BF --> Lookup_TP
+    BF --> Lookup_TN
+    BF --> Lookup_FP
 ```
 
 ```
