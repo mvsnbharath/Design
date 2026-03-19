@@ -2,11 +2,11 @@
 
 ## 1. Goal
 
-Deliver platform metrics from a central cache to cloud customers who have opted in, routing each customer's metrics to their designated storage account.
+Deliver platform resource metrics (e.g. Redis cache metrics) from a central cache to cloud customers who have opted in, routing each customer's metrics to their designated storage account.
 
 ```mermaid
 flowchart TB
-    A[Central Metrics Cache] -->|export| B[Customer Storage Account]
+    A[Platform Resource Metrics<br/>e.g. Redis Cache Metrics] -->|export| B[Customer Storage Account]
 ```
 
 ---
@@ -52,7 +52,7 @@ In practice, only a tiny fraction of resources have export enabled — perhaps *
 
 ```mermaid
 flowchart TB
-    P[Central Producer<br/>10,000 resources] --> DP[Data Plane]
+    P[Platform Resource Metrics<br/>e.g. 10,000 Redis instances] --> DP[Data Plane]
     DP -->|10,000 config lookups| CP[Control Plane]
     CP -->|9,990 = no config ❌<br/>10 = has config ✔| DP
 ```
@@ -72,8 +72,8 @@ This eliminates the vast majority of unnecessary calls.
 
 ```mermaid
 flowchart TB
-    subgraph Producer[Central Metrics Producer]
-        P[Platform Metrics Emitter]
+    subgraph Producer[Platform Resource Metrics Producer]
+        P[e.g. Redis Cache Metrics Emitter]
     end
 
     subgraph DataPlane[Data Plane]
