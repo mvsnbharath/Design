@@ -69,11 +69,11 @@ flowchart TB
 
     subgraph CMS[Central Metrics Store]
         P[Metrics Stream]
+        BF{Bloom Filter<br/>Check}
     end
 
     subgraph DataPlane[Data Plane]
-        D1[Fork & Receive Metrics]
-        BF{Bloom Filter<br/>Check}
+        D1[Receive Metrics]
         D2[Lookup Config]
         D3[Resolve Destination]
         D4[Deliver Metrics]
@@ -88,10 +88,10 @@ flowchart TB
     end
 
     PR -->|emit| P
-    P -->|fork| D1
-    D1 --> BF
-    BF -->|Not in filter → skip| D1
-    BF -->|Possibly in filter → proceed| D2
+    P --> BF
+    BF -->|Not in filter → skip| P
+    BF -->|Possibly in filter → forward| D1
+    D1 --> D2
     D2 --> CP
     CP --> D3
     D3 --> D4
@@ -111,7 +111,7 @@ flowchart TB
         FULL[Full Rebuild<br/>daily]
     end
 
-    subgraph DataPlane[Data Plane]
+    subgraph CMS[Central Metrics Store]
         BF[Bloom Filter]
     end
 
