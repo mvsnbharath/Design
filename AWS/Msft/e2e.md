@@ -63,29 +63,27 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    subgraph BF[Bloom Filter — Bit Array]
+    subgraph BF["Bloom Filter — Bit Array"]
         direction LR
-        B0[0]
-        B1[1]
-        B2[0]
-        B3[1]
-        B4[0]
-        B5[1]
-        B6[0]
-        B7[0]
+        B0["[0]=0"]
+        B1["[1]=1"]
+        B2["[2]=0"]
+        B3["[3]=1"]
+        B4["[4]=0"]
+        B5["[5]=1"]
+        B6["[6]=0"]
+        B7["[7]=0"]
     end
 
-    subgraph Insert[Insert: Resource X]
+    subgraph Insert["Insert: Resource X"]
         H1["Hash₁(X) → index 1"]
-        H2["Hash₂(X) → index 3"]
-        H3["Hash₃(X) → index 5"]
+        H2["Hash₂(X) → index 5"]
     end
 
     subgraph Lookup_TP["✔ True Positive — Resource X"]
         T1["Hash₁(X) → index 1 → ✔"]
-        T2["Hash₂(X) → index 3 → ✔"]
-        T3["Hash₃(X) → index 5 → ✔"]
-        T4["All bits = 1 → In set ✔ (X was inserted)"]
+        T2["Hash₂(X) → index 5 → ✔"]
+        T3["All bits = 1 → In set ✔ (X was inserted)"]
     end
 
     subgraph Lookup_TN["✔ True Negative — Resource Y"]
