@@ -75,41 +75,49 @@ flowchart LR
         B7["[7]=0"]
     end
 
-    subgraph Insert["Insert: Resource X"]
+    subgraph Insert_X["Insert: Resource X"]
+        direction LR
         H1["Hash₁(X) → index 1"]
         H2["Hash₂(X) → index 5"]
     end
 
+    subgraph Insert_W["Insert: Resource W"]
+        direction LR
+        H3["Hash₁(W) → index 3"]
+        H4["Hash₂(W) → index 5"]
+    end
+
+    Insert_X --> BF
+    Insert_W --> BF
+```
+
+```mermaid
+flowchart LR
     subgraph Lookup_TP["✔ True Positive — Resource X"]
-        T1["Hash₁(X) → index 1 → ✔"]
-        T2["Hash₂(X) → index 5 → ✔"]
-        T3["All bits = 1 → In set ✔ (X was inserted)"]
+        direction LR
+        T1["Hash₁(X) → [1]=1 ✔"] --> T2["Hash₂(X) → [5]=1 ✔"] --> T3["All bits = 1 → In set ✔"]
     end
+```
 
+```mermaid
+flowchart LR
     subgraph Lookup_TN["✔ True Negative — Resource Y"]
-        L1["Hash₁(Y) → index 1 → ✔"]
-        L2["Hash₂(Y) → index 4 → ✘"]
-        L3["Any bit = 0 → Definitely NOT in set"]
+        direction LR
+        L1["Hash₁(Y) → [1]=1 ✔"] --> L2["Hash₂(Y) → [4]=0 ✘"] --> L3["A bit = 0 → NOT in set"]
     end
+```
 
+```mermaid
+flowchart LR
     subgraph Lookup_FP["⚠ False Positive — Resource Z"]
-        F1["Hash₁(Z) → index 1 → ✔"]
-        F2["Hash₂(Z) → index 3 → ✔"]
-        F3["All bits = 1 → Looks like it's in set, but Z was never inserted!"]
+        direction LR
+        F1["Hash₁(Z) → [1]=1 ✔"] --> F2["Hash₂(Z) → [3]=1 ✔"] --> F3["All bits = 1, but Z was never inserted!"]
     end
-
-    Insert --> BF
-    BF --> Lookup_TP
-    BF --> Lookup_TN
-    BF --> Lookup_FP
 ```
 
 ```
-Insert: hash the resource ID → set bits at those positions to 1.
-Lookup: hash the resource ID → check bits.
-  • All bits = 1  → Possibly in set (proceed with Control Plane call)
-  • Any bit  = 0  → Definitely NOT in set (skip — no config exists)
-  • False positives possible, false negatives never.
+Bits [1],[5] set by X.  Bits [3],[5] set by W.
+Z hashes to [1] (from X) and [3] (from W) — both 1 → false positive.
 ```
 
 ---
