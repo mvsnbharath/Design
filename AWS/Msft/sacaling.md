@@ -1,82 +1,135 @@
-# Scaling Story: Read-Heavy Configuration Service
+# Scaling a Configuration-Heavy Service
 
-Interview walkthrough diagrams
+A progressive walkthrough of optimizations that reduced DB cost by ~70%.
 
-## 1. Baseline
+---
+
+## 1. Baseline Problem
+
+```mermaid
+flowchart TB
+    subgraph Traffic["Traffic Growth"]
+        T1["50K RPM"] -->|2x increase| T2["100K RPM"]
+    end
+
+    subgraph Cost["DB Cost Impact"]
+        C1["$X"] -->|6x increase| C2["$6X"]
+    end
+
+    subgraph Flows["Two Request Flows"]
+        direction LR
+        EXT["External Requests<br/>customer-friendly ID"]
+        INT["Internal Requests<br/>UUID"]
+    end
+
+    Traffic --> Cost
+    EXT --> DB[(Database)]
+    INT --> DB
+```
+
+---
+
+## 2. Expensive Query Path
 
 ```mermaid
 flowchart LR
-    A[External Requests<br/>Customer ID] --> D[Service]
-    B[Internal Requests<br/>UUID] --> D
-    D --> E[Database]
-    E --> F[High Read Load]
-    F --> G[6x Cost Increase]
-    H[50K RPM] --> I[100K RPM]
-    I --> G
+    subgraph External["External Flow — Efficient"]
+        E1[External Request] -->|customer ID = partition key| E2[Point Read] --> DB1[(Database)]
+    end
 
+    subgraph Internal["Internal Flow — Expensive"]
+        I1[Internal Request] -->|UUID ≠ partition key| I2[Cross-Partition Query] --> DB2[(Database)]
+    end
+```
+
+---
+
+## 3. Point-Read Optimization
+
+```mermaid
 flowchart LR
-    A[Request] --> B[Service]
-    B --> C{Partition Key Known?}
-    C -->|Yes, but ignored| D[Cross-Partition Query]
-    D --> E[Full Scan / High RU]
+    R1[Request] --> Check{Partition Key<br/>Known?}
+    Check -->|Yes| PR[Point Read<br/>O 1 — cheap] --> DB[(Database)]
+    Check -->|No| CQ[Cross-Partition Query<br/>O N — expensive] --> DB
+```
 
+---
+
+## 4. Reverse-Index Optimization
+
+```mermaid
 flowchart LR
-    A[Request] --> B[Service]
-    B --> C{Partition Key Known?}
-    C -->|Yes| D[Point Read]
-    C -->|No| E[Query]
-    D --> F[Low Cost]
-    E --> G[Higher Cost]
+    I1[Internal Request<br/>UUID] --> RI[Reverse Index<br/>UUID → Partition Key]
+    RI --> PR[Point Read] --> DB[(Database)]
 
-flowchart LR
-    A[Internal Request<br/>UUID] --> B[Service]
-    B --> C[Reverse Index]
-    C --> D[Primary ID / Partition Key]
-    D --> E[Point Read]
-    E --> F[Efficient Internal Path]
+    E1[External Request<br/>Customer ID] --> PR2[Point Read] --> DB
+```
 
-flowchart LR
-    A[Read Requests] --> B[Service]
-    B --> C[Cache]
-    C -->|Miss / Expired| D[Database]
-    D --> E[High DB Load]
+---
 
-    C --> F[Short TTL]
-    C --> G[Long TTL]
+## 5. Cache Invalidation Tradeoff
 
-    F --> H[Fresh Data]
-    F --> I[More DB Reads]
+```mermaid
+flowchart TB
+    subgraph ShortTTL["Short TTL"]
+        direction LR
+        S1[Fresh Data ✔] --> S2[Too Many DB Reads ✘]
+    end
 
-    G --> J[Fewer DB Reads]
-    G --> K[More Staleness]
+    subgraph LongTTL["Long TTL"]
+        direction LR
+        L1[Fewer DB Reads ✔] --> L2[Stale Data ✘]
+    end
 
-flowchart LR
-    A[Read Requests] --> B[Service]
-    B --> C[Version Lookup]
-    C --> D[Cache v1]
-    C --> E[Cache v2]
-    C --> F[Cache v3]
-    F --> G[Latest Config]
-    G --> H[Serve Request]
-    H --> I[Fewer Invalidations]
-    H --> J[Lower DB Reads]
-    K[Tradeoff] --> L[Higher Memory Use]
+    Service --> Cache[(Cache)]
+    Cache --> ShortTTL
+    Cache --> LongTTL
+```
 
-flowchart LR
-    A[External Requests<br/>Customer ID] --> D[Service]
-    B[Internal Requests<br/>UUID] --> D
+---
 
-    D --> E[Reverse Index]
-    E --> F[Primary ID / Partition Key]
+## 6. Versioned Cache Design
 
-    D --> G[Versioned Cache]
-    G -->|Hit| H[Serve Config]
-    G -->|Miss| I[Database]
+```mermaid
+flowchart TB
+    Service -->|read config| Cache[(Cache)]
 
-    I --> J[Point Reads]
-    J --> G
+    subgraph Cache_Versions["Versioned Cache"]
+        direction LR
+        V1["v1 (old)"]
+        V2["v2 (current)"]
+        V3["v3 (latest) ✔"]
+    end
 
-    K[50K RPM -> 100K RPM] --> L[Optimizations]
-    L --> M[DB Cost -70%]
-    L --> N[Cache Cost +20%]
-    L --> O[Scaled Much Further]
+    Cache --> Cache_Versions
+    Config[Config Change] -->|version bump| V3
+
+    subgraph Tradeoff["Tradeoff"]
+        direction LR
+        T1["+ Higher Memory<br/>multiple versions coexist"]
+        T2["✔ Acceptable<br/>config changes are rare"]
+    end
+```
+
+---
+
+## 7. Final System + Outcomes
+
+```mermaid
+flowchart TB
+    EXT[External Requests] --> Service
+    INT[Internal Requests] --> Service
+
+    Service --> VC[(Versioned Cache)]
+    Service --> RI[Reverse Index]
+    RI --> PR[Point Reads Only]
+    PR --> DB[(Database)]
+    VC -->|cache miss| DB
+
+    subgraph Outcomes["Results"]
+        direction LR
+        O1["DB Cost: −70%"]
+        O2["Cache Cost: +20%"]
+        O3["Scale: 100K+ RPM"]
+    end
+```
