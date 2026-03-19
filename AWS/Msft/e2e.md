@@ -4,8 +4,7 @@
 
 ```mermaid
 flowchart TB
-    A[Platform Resource Metrics<br/>e.g. Redis Cache Metrics] -->|emit| B[Central Metrics Producer]
-    B -->|fork & export| C[Customer Storage Account]
+    A[Platform Resource Metrics<br/>e.g. Redis Cache Metrics] -->|export| B[Customer Storage Account]
 ```
 
 ---
@@ -18,7 +17,7 @@ flowchart TB
         PR[e.g. Redis Cache Metrics]
     end
 
-    subgraph CMP[Central Metrics Producer]
+    subgraph CMS[Central Metrics Store]
         P[Metrics Stream]
     end
 
@@ -52,8 +51,8 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    PR[Platform Resource Metrics<br/>e.g. 10,000 Redis instances] -->|emit| CMP[Central Metrics Producer]
-    CMP -->|fork| DP[Data Plane]
+    PR[Platform Resource Metrics<br/>e.g. 10,000 Redis instances] -->|emit| CMS[Central Metrics Store]
+    CMS -->|fork| DP[Data Plane]
     DP -->|10,000 config lookups| CP[Control Plane]
     CP -->|9,990 = no config ❌<br/>10 = has config ✔| DP
 ```
@@ -68,7 +67,7 @@ flowchart TB
         PR[e.g. Redis Cache Metrics]
     end
 
-    subgraph CMP[Central Metrics Producer]
+    subgraph CMS[Central Metrics Store]
         P[Metrics Stream]
     end
 
