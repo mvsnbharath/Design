@@ -1,7 +1,5 @@
 # Scaling a Configuration-Heavy Service
 
-A progressive walkthrough of optimizations that reduced DB cost by ~70%.
-
 ---
 
 ## 1. Baseline Problem
