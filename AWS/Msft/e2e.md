@@ -115,11 +115,6 @@ flowchart LR
     end
 ```
 
-```
-Bits [1],[5] set by X.  Bits [3],[5] set by W.
-Z hashes to [1] (from X) and [3] (from W) — both 1 → false positive.
-```
-
 ---
 
 ## 4. Solution: Introduce a Bloom Filter
