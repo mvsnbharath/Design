@@ -105,14 +105,17 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    EXT[External Requests] --> Service
-    INT[Internal Requests] --> Service
+    EXT[External Requests<br/>Customer ID] --> Service
+    INT[Internal Requests<br/>UUID] --> Service
 
     Service --> VC[(Versioned Cache)]
-    Service --> RI[Reverse Index]
-    RI --> PR[Point Reads Only]
+
+    VC -->|cache miss<br/>external caller| PR[Point Read<br/>Customer ID = Partition Key]
+    VC -->|cache miss<br/>internal caller| RI[Reverse Index<br/>UUID → Partition Key]
+    RI --> PR2[Point Read]
+
     PR --> DB[(Database)]
-    VC -->|cache miss| DB
+    PR2 --> DB
 
     subgraph Outcomes["Results"]
         direction LR
